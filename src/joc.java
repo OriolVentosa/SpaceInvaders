@@ -4,6 +4,7 @@ public class joc {
 	Finestra f;
 	cotxe c[];
 	Sprite s;
+	Sound song;
 	
 	joc(Finestra f){
 		this.f = f;
@@ -50,6 +51,8 @@ public class joc {
 		c = new cotxe[3];
 		for(int  i=0; i<c.length;i++)
 			c[i]= new cotxe(30,50+80 * i, 2 *(i+1));
-		s = new Sprite("yes.PNG");
+		s = new Sprite("yes.PNG",100,300, 100, 300);
+		song = new Sound("mixkit-retro-emergency-tones-2971.wav",2);
+		//song.play();
 	}
 }

@@ -10,27 +10,27 @@ import javax.imageio.ImageIO;
 
 public class Sprite{
     BufferedImage bi;
-    int width;
-    int height;
-
+    int x,y,width,height;
 	
-	public Sprite(String image_name) {
+	public Sprite(String image_name, int x, int y, int width, int height) {
        try {
-            bi = ImageIO.read(new File("/SpaceInvaders/data/" + image_name));
+            bi = ImageIO.read(new File("/SpaceInvaders/data/images/" + image_name));
        } catch (IOException ex) {
            System.out.println("No s'ha carregat correctament la imatge");
            System.exit(0);
        }
        
-       height = bi.getHeight();
-       width = bi.getWidth();
+       this.height = height;
+       this.width = width;
+       this.x = x;
+       this.y = y;
 	}
 	
 	public void mostraImatge(Graphics g) {
         Graphics2D g2 = (Graphics2D)g;
         TexturePaint paint = new TexturePaint(bi,
-                new Rectangle2D.Double(0,0,width,height));
+                new Rectangle2D.Double(x,y,width,height));
         g2.setPaint(paint);
-        g2.fillRect(0, 0, width, height);
+        g2.fillRect(x, y, width, height);
 	}
 }
