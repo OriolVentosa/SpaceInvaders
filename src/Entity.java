@@ -1,16 +1,29 @@
-
-public class Entity {
+public class Entity extends Sprite{
 	int nLives;
 	Boolean alive;
-	Sprite sprite;
-	int x,y,width, height;
 	
 	Entity(int x, int y, int width, int height, int nLives, String imageName){
-		this.x = x;
-		this.y = y;
+		super(imageName,x,y, width, height);
+
 		this.width = width;
 		this.height = height;
 		this.nLives = nLives;
-		this.sprite = new Sprite(imageName,x,y, width, height);
+	}
+	
+	public void setPosition(int x,int y) {
+		this.x = x;
+		this.y = y;
+	}
+	
+	public void incPosition(int x, int y) {
+		this.x += x;
+		this.y += y;
+	}
+	
+	public int[] getPosition() {
+		int pos[] = new int[2];
+		pos[0] =x;
+		pos[1] = y;
+		return pos;
 	}
 }
