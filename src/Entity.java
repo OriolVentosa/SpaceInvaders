@@ -1,6 +1,6 @@
 public class Entity extends Sprite{
 	int nLives;
-	Boolean alive;
+	Boolean alive = true;
 	
 	Entity(int x, int y, int width, int height, int nLives, String imageName){
 		super(imageName,x,y, width, height);

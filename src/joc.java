@@ -1,4 +1,5 @@
 import java.awt.Color;
+import java.util.ArrayList;
 
 public class joc {
 	Finestra f;
@@ -7,15 +8,30 @@ public class joc {
 	Player p;
 	Enemy enemies[][];
 	
+	ArrayList<Bullet> p_bullets = new ArrayList<Bullet>();
+	
+	Sound song;
+
+	//Timers per moviment i dispars
 	long delay = 1000;
+	long fire_delay = 1000;
+	long move_time = 0;
+	long fire_time = 0;
+	
+	//Variables de moviment
 	int side_speed = 10;
 	int down_speed = 13;
-	
-	long move_time = 0;
-	
 	int dir = -1;
 	boolean w_down;
-	Sound song;
+	
+	//Distancia entre naus enemigues
+	int[] e_space = {30,30};
+	
+	//Tamany naus enemigues
+	int[] e_size = {30,30};
+	
+	//Tamany bales
+	int[] b_size = {10,20};
 	
 	//Variables per controlar timers
 	long delta_time;
@@ -40,9 +56,32 @@ public class joc {
 		delta_time = System.currentTimeMillis()-last_time;
 		last_time = System.currentTimeMillis();
 		move_time += delta_time;
+		fire_time += delta_time;
 	}
 
 	private void detectarXocs() {
+		int resta_x;
+		int resta_y;
+		
+		int index_x;
+		int index_y;		
+		
+		int[] f_enemy_pos = enemies[0][0].getPosition();
+		
+		for(Bullet p_bullet: p_bullets) {
+			p_bullet.move();
+			int[] bullet_pos = p_bullet.getPos();
+			resta_x = bullet_pos[0] - f_enemy_pos[0];
+			resta_y = bullet_pos[1] - f_enemy_pos[1];
+			if(resta_x+b_size[0]>0 && resta_y+b_size[1]>0) {
+				index_x = (resta_x+e_space[0]/2)/(e_space[0]+e_size[0]);
+				index_y = (resta_y+e_space[1]/2)/(e_space[1]+e_size[1]);
+				if(index_x<enemies.length && index_y<enemies[0].length) {
+					enemies[index_x][index_y].handleColision(bullet_pos, b_size);
+				}
+			}
+		}
+
 	}
 	
 	private void sleep() {
@@ -61,6 +100,7 @@ public class joc {
 			c[i].pinta(f.g);
 		p.mostraImatge(f.g);
 		showEnemies();
+		for(Bullet p_bullet: p_bullets) p_bullet.pintar(f.g);
 		f.repaint();
 	}
 	
@@ -120,13 +160,22 @@ public class joc {
 	//S'haura de canviar per quan implementi modificar el tamany de la finestra
 	public void KeyPressed(char key) {
 		int pos[] = p.getPosition();
-		if(key=='a') {
-			if(pos[0]>10) p.incPosition(-2,0);
-			else p.setPosition(8, pos[1]);
-		}
-		if(key == 'd') {
-			if(pos[0]<690) p.incPosition(2,0);
-			else p.setPosition(692, pos[1]);
+
+		switch(key) {
+			case 'a':
+				if(pos[0]>10) p.incPosition(-2,0);
+				else p.setPosition(8, pos[1]);
+				break;
+			case 'd':
+				if(pos[0]<690) p.incPosition(2,0);
+				else p.setPosition(692, pos[1]);
+				break;
+			case ' ':
+				if(fire_time>fire_delay) {
+					p_bullets.add(new Bullet(pos[0] + p.width/2, pos[1], 10, 30, true));
+					fire_time = 0;
+				}
+				break;
 		}
 	}
 	
@@ -137,7 +186,8 @@ public class joc {
 		enemies = new Enemy[4][5];
 		for(int i =0 ; i<4; i++) {
 			for(int j = 0; j<5; j++ ) {
-				enemies[i][j] = new Enemy(84 + i*2*76, 36+ j*2*36, 76,36, 1);
+				enemies[i][j] = new Enemy(84 + i*(e_size[0] + e_space[0]), 36+ j*(e_size[1] + e_space[1]), 
+											e_size[0],e_size[1], 1);
 			}
 		}
 	}
