@@ -6,7 +6,20 @@ public class joc {
 	Sprite s;
 	Player p;
 	Enemy enemies[][];
+	
+	long delay = 1000;
+	int side_speed = 10;
+	int down_speed = 13;
+	
+	long move_time = 0;
+	
+	int dir = -1;
+	boolean w_down;
 	Sound song;
+	
+	//Variables per controlar timers
+	long delta_time;
+	long last_time;
 	
 	joc(Finestra f){
 		this.f = f;
@@ -15,15 +28,21 @@ public class joc {
 	void run() {
 		inicialitzacio();
 		while(true) {
-			ferMoviments();
+			updateTimers();
 			detectarXocs();
+			updateEnemies();
 			pintarPantalla();
 			sleep();
 		}
 	}
 	
+	private void updateTimers() {
+		delta_time = System.currentTimeMillis()-last_time;
+		last_time = System.currentTimeMillis();
+		move_time += delta_time;
+	}
+
 	private void detectarXocs() {
-		// TODO Auto-generated method stub
 	}
 	
 	private void sleep() {
@@ -45,12 +64,50 @@ public class joc {
 		f.repaint();
 	}
 	
-	private void ferMoviments() {
-		for(cotxe Cotxe: c)
-			Cotxe.moure();
+	private void updateEnemies() {
+		if(delay<move_time) {
+			//Posició del primer alien de la fila
+			int pos_p[] = enemies[0][0].getPosition();
+			//Posició de l'últim alien de la fila
+			int pos_f[] = enemies[enemies.length-1][0].getPosition();
+			//Tractar el cas en que estigui a un borde
+			if(pos_p[0]<10 || pos_f[0]>f.AMPLE-10-enemies[0][0].width) downMove();
+			else sideMove();
+			move_time = 0;
+		}
 	}
 	
+	private void downMove() {
+		if(!w_down) {
+			for(int i = 0; i<enemies.length; i++) {
+				for(int j = 0; j < enemies[0].length; j++) {
+					enemies[i][j].incPosition(0, down_speed);
+				}
+			}
+			w_down = true;
+		}
+		else {
+			dir*=-1;
+			w_down = false;
+			for(int i = 0; i<enemies.length; i++) {
+				for(int j = 0; j < enemies[0].length; j++) {
+					enemies[i][j].incPosition(dir*side_speed, 0);
+				}
+			}
+		}
+	}
+	
+	public void sideMove() {
+		for(int i = 0; i<enemies.length; i++) {
+			for(int j = 0; j < enemies[0].length; j++) {
+				enemies[i][j].incPosition(dir*side_speed, 0);
+			}
+		}
+	}
+	
+
 	private void inicialitzacio() {
+		last_time = System.currentTimeMillis();
 		c = new cotxe[3];
 		for(int  i=0; i<c.length;i++)
 			c[i]= new cotxe(30,50+80 * i, 2 *(i+1));
@@ -75,6 +132,8 @@ public class joc {
 	
 	//Fer dependre del tamany de la pantalla
 	public void initEnemies() {
+		dir = -1;
+		w_down = false;
 		enemies = new Enemy[4][5];
 		for(int i =0 ; i<4; i++) {
 			for(int j = 0; j<5; j++ ) {
@@ -89,11 +148,5 @@ public class joc {
 				enemies[i][j].mostraImatge(f.g);
 			}
 		}
-	}
-	
-	public void moveEnemies() {
-		
-	}
-	
-	
+	}	
 }
