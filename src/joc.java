@@ -45,9 +45,9 @@ public class joc {
 		inicialitzacio();
 		while(true) {
 			updateTimers();
+			pintarPantalla();
 			detectarXocs();
 			updateEnemies();
-			pintarPantalla();
 			sleep();
 		}
 	}
@@ -70,6 +70,7 @@ public class joc {
 		
 		for(Bullet p_bullet: p_bullets) {
 			p_bullet.move();
+			p_bullet.pintar(f.g);
 			int[] bullet_pos = p_bullet.getPos();
 			resta_x = bullet_pos[0] - f_enemy_pos[0];
 			resta_y = bullet_pos[1] - f_enemy_pos[1];
@@ -77,11 +78,12 @@ public class joc {
 				index_x = (resta_x+e_space[0]/2)/(e_space[0]+e_size[0]);
 				index_y = (resta_y+e_space[1]/2)/(e_space[1]+e_size[1]);
 				if(index_x<enemies.length && index_y<enemies[0].length) {
-					enemies[index_x][index_y].handleColision(bullet_pos, b_size);
+					boolean has_hit = enemies[index_x][index_y].handleCollision(bullet_pos, b_size);
+					if(has_hit) p_bullet.alive =false;
 				}
 			}
 		}
-
+		p_bullets.removeIf(bullet -> bullet.alive == false);
 	}
 	
 	private void sleep() {
@@ -100,7 +102,6 @@ public class joc {
 			c[i].pinta(f.g);
 		p.mostraImatge(f.g);
 		showEnemies();
-		for(Bullet p_bullet: p_bullets) p_bullet.pintar(f.g);
 		f.repaint();
 	}
 	
@@ -195,7 +196,7 @@ public class joc {
 	public void showEnemies() {
 		for(int i =0 ; i<4; i++) {
 			for(int j = 0; j<5; j++ ) {
-				enemies[i][j].mostraImatge(f.g);
+				enemies[i][j].mostraEnemic(f.g);
 			}
 		}
 	}	

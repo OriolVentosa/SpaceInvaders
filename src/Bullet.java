@@ -7,6 +7,9 @@ public class Bullet {
 	int height = 30;
 	int speed = 10;
 	
+	boolean alive = true;
+
+	//Si es del enemic
 	Boolean enemy;
 	
 	Bullet(int x, int y, int width, int height, Boolean enemy){
@@ -22,6 +25,7 @@ public class Bullet {
 	}
 	
 	void pintar(Graphics g){
+		if(!alive) return;
 		g.setColor(Color.black);
 		g.fillRect(x, y, width, height);
 	}

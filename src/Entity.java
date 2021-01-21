@@ -1,4 +1,4 @@
-public class Entity extends Sprite{
+abstract class Entity extends Sprite{
 	int nLives;
 	Boolean alive = true;
 	
@@ -25,5 +25,5 @@ public class Entity extends Sprite{
 		pos[0] =x;
 		pos[1] = y;
 		return pos;
-	}
+	}	
 }
