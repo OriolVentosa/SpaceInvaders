@@ -9,6 +9,7 @@ public class joc {
 	Sprite s;
 	Player p;
 	Enemy enemies[][];
+	Barrier b;
 	
 	ArrayList<Bullet> p_bullets = new ArrayList<Bullet>();
 	ArrayList<Bullet> e_bullets = new ArrayList<Bullet>();
@@ -73,6 +74,7 @@ public class joc {
 		//song.play();
 		p = new Player(300,f.getHeight()-100, p_size[0], p_size[1], 3);
 		initEnemies();
+		initBarriers();
 	}
 	
 	//Fer dependre del tamany de la pantalla
@@ -86,6 +88,10 @@ public class joc {
 											e_size[0],e_size[1], 1);
 			}
 		}
+	}
+	
+	public void initBarriers() {
+		b = new Barrier(300,300);
 	}
 	
 	private void updateTimers() {
@@ -109,7 +115,7 @@ public class joc {
 		int index_y;		
 		
 		int[] f_enemy_pos = enemies[0][0].getPosition();
-		
+		boolean has_hit = false;
 		for(Bullet p_bullet: p_bullets) {
 			p_bullet.move(1);
 			p_bullet.pintar(f.g);
@@ -120,21 +126,28 @@ public class joc {
 				index_x = (resta_x+e_space[0]/2)/(e_space[0]+e_size[0]);
 				index_y = (resta_y+e_space[1]/2)/(e_space[1]+e_size[1]);
 				if(index_x<enemies.length && index_y<enemies[0].length) {
-					boolean has_hit = enemies[index_x][index_y].handleCollision(bullet_pos, b_size, p_bullet.alive);
+					has_hit = enemies[index_x][index_y].handleCollision(bullet_pos, b_size, p_bullet.alive);
 					if(has_hit) p_bullet.alive =false;
 				}
 			}
+			has_hit = b.handleCollision(bullet_pos, b_size, p_bullet.alive, true);
+			if(has_hit) p_bullet.alive =false;
+			has_hit = false;
 		}
 		p_bullets.removeIf(bullet -> bullet.alive == false);
 	}
 	
 	private void enemyBullets() {
+		boolean has_hit = false;
 		for(Bullet e_bullet: e_bullets) {
 			e_bullet.move(-1);
 			e_bullet.pintar(f.g);
 			int[] bullet_pos = e_bullet.getPos();
-			boolean hasHit = p.handleCollision(bullet_pos, b_size, e_bullet.alive); 
-			if(hasHit) e_bullet.alive = false;
+			has_hit = p.handleCollision(bullet_pos, b_size, e_bullet.alive); 
+			if(has_hit) e_bullet.alive = false;
+			has_hit = b.handleCollision(bullet_pos, b_size, e_bullet.alive, true);
+			if(has_hit) e_bullet.alive =false;
+			has_hit = false;
 		}
 		
 		e_bullets.removeIf(bullet-> bullet.alive == false);
@@ -230,6 +243,7 @@ public class joc {
 		for(int  i=0; i<c.length;i++)
 			c[i].pinta(f.g);
 		p.mostraImatge(f.g);
+		b.showBarrier(f.g);
 		showEnemies();
 		f.repaint();
 	}
