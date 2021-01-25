@@ -20,8 +20,8 @@ public class Bullet {
 		this.enemy = enemy;
 	}
 	
-	void move() {
-		y-=speed;
+	void move(int dir) {
+		y-=speed*dir;
 	}
 	
 	void pintar(Graphics g){

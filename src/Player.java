@@ -3,9 +3,5 @@ public class Player extends Entity{
 		super(x,y,width, height, nLives, "nau_prov.png");
 	}
 	
-	
-	Boolean handleCollision() {
-		return true;
-	}
 }
 
