@@ -1,10 +1,11 @@
+import java.awt.image.BufferedImage;
+
 abstract class Entity extends Sprite{
 	int nLives;
 	Boolean alive = true;
 	
-	Entity(int x, int y, int width, int height, int nLives, String imageName){
-		super(imageName,x,y, width, height);
-
+	Entity(int x, int y, int width, int height, int nLives, BufferedImage[] images){
+		super(images,x,y, width, height);
 		this.width = width;
 		this.height = height;
 		this.nLives = nLives;

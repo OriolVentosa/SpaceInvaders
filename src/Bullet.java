@@ -26,7 +26,7 @@ public class Bullet {
 	
 	void pintar(Graphics g){
 		if(!alive) return;
-		g.setColor(Color.black);
+		g.setColor(Color.white);
 		g.fillRect(x, y, width, height);
 	}
 	

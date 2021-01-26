@@ -59,8 +59,10 @@ public class joc {
 	}
 	
 	void loadTextures() {
-		String player = "nau_prov";
-		String[] enemies = {"nau_prov"};
+		String player = "nau";
+		String[] enemies = {"enemy_1_1", "enemy_1_2",
+							"enemy_2_1", "enemy_2_2",
+							"enemy_3_1", "enemy_3_2"};
 		String[] blocks = {"vida_3", "vida_2", "vida_1"};
 		tl = new TextureLoader(player, enemies, blocks);
 	}
@@ -72,7 +74,7 @@ public class joc {
 			c[i]= new cotxe(30,50+80 * i, 2 *(i+1));
 		song = new Sound("mixkit-retro-emergency-tones-2971.wav",2);
 		//song.play();
-		p = new Player(300,f.getHeight()-100, p_size[0], p_size[1], 3);
+		p = new Player(300,f.getHeight()-100, p_size[0], p_size[1], 3, tl.getPlayerImage());
 		initEnemies();
 		initBarriers();
 	}
@@ -85,7 +87,7 @@ public class joc {
 		for(int i =0 ; i<4; i++) {
 			for(int j = 0; j<5; j++ ) {
 				enemies[i][j] = new Enemy(84 + i*(e_size[0] + e_space[0]), 36+ j*(e_size[1] + e_space[1]), 
-											e_size[0],e_size[1], 1);
+											e_size[0],e_size[1], 1,1, tl.getEnemiesImages(1));
 			}
 		}
 	}
@@ -163,6 +165,7 @@ public class joc {
 			//Tractar el cas en que estigui a un borde
 			if(pos_p[0]<10 || pos_f[0]>f.AMPLE-10-enemies[0][0].width) downMove();
 			else sideMove();
+
 			move_time = 0;
 		}
 		
@@ -192,6 +195,7 @@ public class joc {
 			for(int i = 0; i<enemies.length; i++) {
 				for(int j = 0; j < enemies[0].length; j++) {
 					enemies[i][j].incPosition(0, down_speed);
+					enemies[i][j].changeSprite();
 				}
 			}
 			w_down = true;
@@ -202,6 +206,7 @@ public class joc {
 			for(int i = 0; i<enemies.length; i++) {
 				for(int j = 0; j < enemies[0].length; j++) {
 					enemies[i][j].incPosition(dir*side_speed, 0);
+					enemies[i][j].changeSprite();
 				}
 			}
 		}
@@ -211,6 +216,7 @@ public class joc {
 		for(int i = 0; i<enemies.length; i++) {
 			for(int j = 0; j < enemies[0].length; j++) {
 				enemies[i][j].incPosition(dir*side_speed, 0);
+				enemies[i][j].changeSprite();
 			}
 		}
 	}
@@ -238,11 +244,11 @@ public class joc {
 	}
 	
 	private void pintarPantalla() {
-		f.g.setColor(Color.white);
+		f.g.setColor(Color.black);
 		f.g.fillRect(0,0, f.AMPLE,f.ALT);
 		for(int  i=0; i<c.length;i++)
 			c[i].pinta(f.g);
-		p.mostraImatge(f.g);
+		p.mostraImatge(f.g,0);
 		b.showBarrier(f.g);
 		showEnemies();
 		f.repaint();
@@ -264,5 +270,4 @@ public class joc {
 			e.printStackTrace(); 
 		}
 	}
-	
 }

@@ -51,12 +51,17 @@ public class TextureLoader {
 		Blocks(blocks);
 	}
 	
-	BufferedImage getPlayerImage() {
-		return player;
+	BufferedImage[] getPlayerImage() {
+		BufferedImage[] p = new BufferedImage[1];
+		p[0] = player;
+		return p;
 	}
 	
-	ArrayList<BufferedImage> getEnemiesImages(){
-		return enemies;
+	BufferedImage[] getEnemiesImages(int type){
+		BufferedImage[] e = new BufferedImage[2];
+		e[0] = enemies.get((type-1)*2);
+		e[1] = enemies.get((type-1)*2+1);
+		return e;
 	}
 	
 	ArrayList<BufferedImage> getBlocksImages(){

@@ -36,8 +36,6 @@ public class Finestra extends Frame implements KeyListener {
 		paint(g);
 	}
 	
-	
-	
 	@Override
 	public void keyTyped(KeyEvent e) {
 		j.KeyPressed(e.getKeyChar());

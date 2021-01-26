@@ -1,7 +1,8 @@
+import java.awt.image.BufferedImage;
+
 public class Player extends Entity{
-	public Player(int x, int y, int width, int height, int nLives) {
-		super(x,y,width, height, nLives, "nau_prov.png");
+	public Player(int x, int y, int width, int height, int nLives, BufferedImage[] nau) {
+		super(x,y,width, height, nLives, nau);
 	}
-	
 }
 
