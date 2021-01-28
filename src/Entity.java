@@ -2,7 +2,7 @@ import java.awt.image.BufferedImage;
 
 abstract class Entity extends Sprite{
 	int nLives;
-	Boolean alive = true;
+	boolean alive = true;
 	
 	Entity(int x, int y, int width, int height, int nLives, BufferedImage[] images){
 		super(images,x,y, width, height);
@@ -30,7 +30,7 @@ abstract class Entity extends Sprite{
 	
 	public boolean handleCollision(int[] b_pos, int[] b_size, boolean b_alive) {
 		if(alive && b_alive) {
-			Boolean overlap = true;
+			boolean overlap = true;
 			int l1[] = {x,y};
 			int l2[] = {b_pos[0], b_pos[1]};
 			int r1[] = {x+width,  y+height};
@@ -45,5 +45,4 @@ abstract class Entity extends Sprite{
 		}
 		return false;	
 	}
-	
 }

@@ -2,22 +2,41 @@ import java.awt.Color;
 import java.awt.Graphics;
 
 public class Barrier {
-	int width = 100;
-	int height = 100;
-	boolean not_broken[][] = new boolean[width][height];
+	int width = 13;
+	int height = 9;
+	int scale;
+	boolean not_broken[][];
+	int[] forma = {
+				0,0,0,0,0,1,1,1,0,0,0,0,0,
+				0,0,0,1,1,1,1,1,1,1,0,0,0,
+				0,0,1,1,1,1,1,1,1,1,1,0,0,
+				0,1,1,1,1,1,1,1,1,1,1,1,0,
+				1,1,1,1,1,1,1,1,1,1,1,1,1,
+				1,1,1,1,0,0,0,0,0,1,1,1,1,
+				1,1,1,0,0,0,0,0,0,0,1,1,1,
+				1,1,0,0,0,0,0,0,0,0,0,1,1,
+				1,1,0,0,0,0,0,0,0,0,0,1,1,
+				};
 	int x;
 	int y;
 	
 	int explosion_radius = 10;
 	
-	Barrier(int x, int y){
+	Barrier(int x, int y, int scale){
 		this.x = x;
 		this.y = y;
-		for(int i = 0; i<width; i++) {
-			for(int j= 0; j<height; j++) {
-				not_broken[i][j] = true;
+		not_broken = new boolean[width * 2 * scale][height * 2 * scale];
+		for(int i = 0; i<width * 2 * scale; i++) {
+			for(int j= 0; j<height * 2 * scale; j++) {
+				int index_i  = i/(scale*2);
+				int index_j = j/(scale*2);
+				int index = index_j*width + index_i;
+				if(forma[index] == 1) not_broken[i][j] = true;
 			}
 		}
+		this.scale = scale;
+		this.width = width * 2 * scale;
+		this.height = height * 2 * scale;
 	}
 	
 	void showBarrier(Graphics g) {

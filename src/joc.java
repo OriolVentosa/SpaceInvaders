@@ -8,8 +8,8 @@ public class joc {
 	cotxe c[];
 	Sprite s;
 	Player p;
-	Enemy enemies[][];
-	Barrier b;
+	Enemy enemies[][] = new Enemy[11][5];
+	Barrier[] bars = new Barrier[4];
 	
 	ArrayList<Bullet> p_bullets = new ArrayList<Bullet>();
 	ArrayList<Bullet> e_bullets = new ArrayList<Bullet>();
@@ -29,11 +29,11 @@ public class joc {
 	boolean w_down = false;
 	
 	//Distancia entre naus enemigues
-	int[] e_space = {30,30};
+	int[] e_space = {6,6};
 	
 	//Tamany naus enemigues
-	int[] p_size = {30,30};
-	int[] e_size = {30,30};
+	int[] p_size = {15,15};
+	int[] e_size = {15,15};
 	
 	//Tamany bales
 	int[] b_size = {4,10};
@@ -69,12 +69,9 @@ public class joc {
 	
 	private void inicialitzacio() {
 		last_time = System.currentTimeMillis();
-		c = new cotxe[3];
-		for(int  i=0; i<c.length;i++)
-			c[i]= new cotxe(30,50+80 * i, 2 *(i+1));
 		song = new Sound("mixkit-retro-emergency-tones-2971.wav",2);
 		//song.play();
-		p = new Player(300,f.getHeight()-100, p_size[0], p_size[1], 3, tl.getPlayerImage());
+		p = new Player(f.getWidth()/2,(int)(f.getHeight()*0.8), p_size[0]*f.scale, p_size[1]*f.scale, 3, tl.getPlayerImage());
 		initEnemies();
 		initBarriers();
 	}
@@ -83,17 +80,18 @@ public class joc {
 	public void initEnemies() {
 		dir = -1;
 		w_down = false;
-		enemies = new Enemy[4][5];
-		for(int i =0 ; i<4; i++) {
-			for(int j = 0; j<5; j++ ) {
-				enemies[i][j] = new Enemy(84 + i*(e_size[0] + e_space[0]), 36+ j*(e_size[1] + e_space[1]), 
-											e_size[0],e_size[1], 1,1, tl.getEnemiesImages(1));
+		for(int i =0 ; i<enemies.length; i++) {
+			for(int j = 0; j<enemies[0].length; j++ ) {
+				enemies[i][j] = new Enemy(8 + i*(e_size[0] + e_space[0])*f.scale, (int)(f.getHeight()*0.25)+ j*(e_size[1] + e_space[1])*f.scale, 
+											e_size[0]*f.scale,e_size[1]*f.scale, 1,1, tl.getEnemiesImages(1));
 			}
 		}
 	}
 	
 	public void initBarriers() {
-		b = new Barrier(300,300);
+		for(int i = 0; i<bars.length; i++) {
+			bars[i] = new Barrier((int) (f.getWidth()*0.15 + i * f.getWidth() * 0.2),(int)(f.getHeight()*0.7),f.scale);
+		}
 	}
 	
 	private void updateTimers() {
@@ -125,16 +123,18 @@ public class joc {
 			resta_x = bullet_pos[0] - f_enemy_pos[0];
 			resta_y = bullet_pos[1] - f_enemy_pos[1];
 			if(resta_x+b_size[0]>0 && resta_y+b_size[1]>0) {
-				index_x = (resta_x+e_space[0]/2)/(e_space[0]+e_size[0]);
-				index_y = (resta_y+e_space[1]/2)/(e_space[1]+e_size[1]);
+				index_x = (resta_x+e_space[0]*f.scale/2)/((e_space[0]+e_size[0])*f.scale);
+				index_y = (resta_y+e_space[1]*f.scale/2)/((e_space[1]+e_size[1])*f.scale);
 				if(index_x<enemies.length && index_y<enemies[0].length) {
 					has_hit = enemies[index_x][index_y].handleCollision(bullet_pos, b_size, p_bullet.alive);
 					if(has_hit) p_bullet.alive =false;
 				}
 			}
-			has_hit = b.handleCollision(bullet_pos, b_size, p_bullet.alive, true);
-			if(has_hit) p_bullet.alive =false;
-			has_hit = false;
+			for(Barrier b: bars) {
+				has_hit = b.handleCollision(bullet_pos, b_size, p_bullet.alive, true);
+				if(has_hit) p_bullet.alive =false;
+				has_hit = false;
+			}
 		}
 		p_bullets.removeIf(bullet -> bullet.alive == false);
 	}
@@ -147,11 +147,12 @@ public class joc {
 			int[] bullet_pos = e_bullet.getPos();
 			has_hit = p.handleCollision(bullet_pos, b_size, e_bullet.alive); 
 			if(has_hit) e_bullet.alive = false;
-			has_hit = b.handleCollision(bullet_pos, b_size, e_bullet.alive, true);
-			if(has_hit) e_bullet.alive =false;
-			has_hit = false;
+			for(Barrier b: bars) {
+				has_hit = b.handleCollision(bullet_pos, b_size, e_bullet.alive, true);
+				if(has_hit) e_bullet.alive =false;
+				has_hit = false;
+			}
 		}
-		
 		e_bullets.removeIf(bullet-> bullet.alive == false);
 	}
 	
@@ -246,19 +247,23 @@ public class joc {
 	private void pintarPantalla() {
 		f.g.setColor(Color.black);
 		f.g.fillRect(0,0, f.AMPLE,f.ALT);
-		for(int  i=0; i<c.length;i++)
-			c[i].pinta(f.g);
 		p.mostraImatge(f.g,0);
-		b.showBarrier(f.g);
+		showBarriers();
 		showEnemies();
 		f.repaint();
 	}
 	
-	public void showEnemies() {
-		for(int i =0 ; i<4; i++) {
-			for(int j = 0; j<5; j++ ) {
+	private void showEnemies() {
+		for(int i =0 ; i<enemies.length; i++) {
+			for(int j = 0; j<enemies[0].length; j++ ) {
 				enemies[i][j].mostraEnemic(f.g);
 			}
+		}
+	}
+	
+	private void showBarriers() {
+		for(Barrier b: bars) {
+			b.showBarrier(f.g);
 		}
 	}
 	

@@ -13,20 +13,21 @@ public class Finestra extends Frame implements KeyListener {
 	joc j;
 	Graphics g;
 	Image im;
-	int AMPLE = 800, ALT = 600;
+	public int scale = 2;
+	int AMPLE = 262*scale, ALT = 315*scale;
 	public static void main(String[] args) {
 		new Finestra();
 	}
+	
 	Finestra(){
 		addKeyListener(this);
-		setSize(800,600);
+		setSize(AMPLE,ALT);
 		setVisible(true);
 		
 		im = createImage(AMPLE, ALT);
 		g = im.getGraphics();
 		j = new joc(this);
 		j.run();
-		
 	}
 	public void paint(Graphics g) {
 		g.drawImage(im, 0, 0, null);
