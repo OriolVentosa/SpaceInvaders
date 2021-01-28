@@ -2,26 +2,46 @@ import java.awt.Color;
 import java.awt.Graphics;
 
 public class Barrier {
-	int width = 13;
-	int height = 9;
+	int width = 14;
+	int height = 12;
 	int scale;
 	boolean not_broken[][];
 	int[] forma = {
-				0,0,0,0,0,1,1,1,0,0,0,0,0,
-				0,0,0,1,1,1,1,1,1,1,0,0,0,
-				0,0,1,1,1,1,1,1,1,1,1,0,0,
-				0,1,1,1,1,1,1,1,1,1,1,1,0,
-				1,1,1,1,1,1,1,1,1,1,1,1,1,
-				1,1,1,1,0,0,0,0,0,1,1,1,1,
-				1,1,1,0,0,0,0,0,0,0,1,1,1,
-				1,1,0,0,0,0,0,0,0,0,0,1,1,
-				1,1,0,0,0,0,0,0,0,0,0,1,1,
+				0,0,0,0,0,1,1,1,1,0,0,0,0,0,
+				0,0,0,1,1,1,1,1,1,1,1,0,0,0,
+				0,0,1,1,1,1,1,1,1,1,1,1,0,0,
+				0,1,1,1,1,1,1,1,1,1,1,1,1,0,
+				1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+				1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+				1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+				1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+				1,1,1,1,0,0,0,0,0,0,1,1,1,1,
+				1,1,1,0,0,0,0,0,0,0,0,1,1,1,
+				1,1,0,0,0,0,0,0,0,0,0,0,1,1,
+				1,1,0,0,0,0,0,0,0,0,0,0,1,1,
 				};
+	
+	int explosion_radius = 7;
+	
+	int[] explosion = {
+				1,1,1,0,1,1,1,0,1,1,1,0,1,1,1,
+				1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,
+				1,1,0,1,1,1,1,0,1,1,0,1,1,1,1,
+				1,1,1,1,1,0,0,1,1,0,0,1,1,1,1,
+				1,1,1,1,1,0,1,0,1,0,0,1,1,1,1,
+				1,1,0,1,0,1,1,0,1,1,1,1,1,1,1,
+				1,1,0,0,1,1,0,1,0,1,0,1,1,1,1,
+				1,1,0,1,0,0,1,0,1,0,0,1,1,1,1,
+				1,0,1,0,1,0,1,0,1,1,1,0,1,1,1,
+				0,1,0,1,1,0,0,0,0,1,1,1,1,1,1,
+				1,0,1,1,1,0,0,0,0,1,0,1,0,1,1,
+				0,1,0,1,1,0,0,0,0,1,0,1,0,1,1,
+				1,0,1,0,1,0,0,0,0,1,1,0,1,1,1,
+				1,1,0,1,1,0,0,0,0,0,0,1,1,1,1,
+	};
+	
 	int x;
-	int y;
-	
-	int explosion_radius = 10;
-	
+	int y;	
 	Barrier(int x, int y, int scale){
 		this.x = x;
 		this.y = y;
@@ -79,21 +99,31 @@ public class Barrier {
 					if(not_broken[local_pos_x+i][local_pos_y+j]) {
 						not_broken[local_pos_x+i][local_pos_y+j] = false;
 						hit = true;
-						if(hit) {
-							handleExplosinRadius(b_pos, local_pos_x+b_size[0]/2, local_pos_y+b_size[1]/2);
-						}
+
 					}
 				}
 			}
+		}
+		
+		if(hit) {
+			handleExplosionRadius(b_pos, local_pos_x+b_size[0]/2, local_pos_y+b_size[1]/2);
 		}
 		return hit;		
 	}
 	
 	// Intentar que sembli un cercle, fer destruccio mes aleatoria
-	private void handleExplosinRadius(int[] b_pos, int local_pos_x, int local_pos_y) {
-		for(int i = -explosion_radius; i < explosion_radius; i++) {
+	private void handleExplosionRadius(int[] b_pos, int local_pos_x, int local_pos_y) {
+		int scaled_i;
+		int scaled_j;
+		int index;
+		for(int i = -explosion_radius*scale; i < explosion_radius*scale; i++) {
 			for(int j = -explosion_radius; j < explosion_radius; j++) {
-				if(i*i+j*j<explosion_radius*explosion_radius && (i+j)%5 == 0) {
+				scaled_i = i/scale;
+				scaled_j = j/scale;
+				scaled_i = scaled_i+explosion_radius;
+				scaled_j = scaled_j+explosion_radius;
+				index = scaled_j*(explosion_radius*2+1) + scaled_i;
+				if(explosion[index] == 0) {
 					if(local_pos_x+i>-1 && local_pos_y + j>-1 && 
 					local_pos_x+i<width && local_pos_y + j <height) {
 						not_broken[local_pos_x+i][local_pos_y+j] = false;
