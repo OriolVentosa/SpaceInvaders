@@ -1,4 +1,5 @@
 import java.awt.Color;
+import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -13,6 +14,8 @@ public class joc {
 	
 	ArrayList<Bullet> p_bullets = new ArrayList<Bullet>();
 	ArrayList<Bullet> e_bullets = new ArrayList<Bullet>();
+	ArrayList<Explosion> explosions = new ArrayList<Explosion>();
+		
 	Sound song;
 
 	//Timers per moviment i dispars
@@ -22,6 +25,7 @@ public class joc {
 	long move_time = 0;
 	long fire_time = 0;
 	long e_fire_time = 0;
+	
 	//Variables de moviment
 	int side_speed = 10;
 	int down_speed = 13;
@@ -42,6 +46,13 @@ public class joc {
 	long delta_time;
 	long last_time;
 	
+	//Variables explosinons
+	long ex_time = 250;
+	int ex_size = 15;
+	
+	//Score
+	int score = 0;
+	
 	joc(Finestra f){
 		this.f = f;
 	}
@@ -54,6 +65,7 @@ public class joc {
 			pintarPantalla();
 			handleBullets();
 			updateEnemies();
+			showScore();
 			sleep();
 		}
 	}
@@ -63,8 +75,8 @@ public class joc {
 		String[] enemies = {"enemy_1_1", "enemy_1_2",
 							"enemy_2_1", "enemy_2_2",
 							"enemy_3_1", "enemy_3_2"};
-		String[] blocks = {"vida_3", "vida_2", "vida_1"};
-		tl = new TextureLoader(player, enemies, blocks);
+		String explosion = "explosio";
+		tl = new TextureLoader(player, enemies, explosion);
 	}
 	
 	private void inicialitzacio() {
@@ -100,6 +112,7 @@ public class joc {
 		move_time += delta_time;
 		fire_time += delta_time;
 		e_fire_time += delta_time;
+		for(Explosion ex: explosions) ex.updateExplosionTime(delta_time);
 	}
 
 	private void handleBullets() {
@@ -127,7 +140,11 @@ public class joc {
 				index_y = (resta_y+e_space[1]*f.scale/2)/((e_space[1]+e_size[1])*f.scale);
 				if(index_x<enemies.length && index_y<enemies[0].length) {
 					has_hit = enemies[index_x][index_y].handleCollision(bullet_pos, b_size, p_bullet.alive);
-					if(has_hit) p_bullet.alive =false;
+					if(has_hit) {
+						p_bullet.alive =false;
+						int[] ex_pos = enemies[index_x][index_y].getPosition();
+						explosions.add(new Explosion(tl.getExplosionImage(), ex_pos, ex_time, ex_size * f.scale));
+					}
 				}
 			}
 			for(Barrier b: bars) {
@@ -159,10 +176,35 @@ public class joc {
 	
 	private void updateEnemies() {
 		if(delay<move_time) {
+			boolean b = false;
+			int pos_f[] = new int [2];
+			int pos_p[] = new int [2];
 			//Posició del primer alien de la fila
-			int pos_p[] = enemies[0][0].getPosition();
+			for(int i = 0; i<enemies.length; i++) {
+				for(int j=0; j<enemies[0].length;j++) {
+					if(enemies[i][j].alive) {
+						pos_p = enemies[i][j].getPosition();
+						b=true;
+						break;
+					}
+				}
+				if(b) break;
+			}
+			b=false;
+			
+			for(int i = enemies.length-1; i>-1; i--) {
+				for(int j=0; j<enemies[0].length;j++) {
+					if(enemies[i][j].alive) {
+						pos_f = enemies[i][j].getPosition();
+						b=true;
+						break;
+					}
+				}
+				if(b) break;
+			}
+			
 			//Posició de l'últim alien de la fila
-			int pos_f[] = enemies[enemies.length-1][0].getPosition();
+			
 			//Tractar el cas en que estigui a un borde
 			if(pos_p[0]<10 || pos_f[0]>f.AMPLE-10-enemies[0][0].width) downMove();
 			else sideMove();
@@ -175,7 +217,7 @@ public class joc {
 			//Mirar quins enemics estan vius
 			for(int i = 0; i<enemies.length; i++) {
 				for(int j = 0; j < enemies[0].length; j++) {
-					if(enemies[i][j].alive == true) {
+					if(enemies[i][j].alive) {
 						int[] index= {i,j};
 						e_alive.add(index);
 					}
@@ -222,18 +264,24 @@ public class joc {
 		}
 	}
 	
+	void showScore() {
+		Graphics2D g2 = (Graphics2D)f.g;
+		g2.setFont(f.font);
+		g2.setColor(Color.white);
+		g2.drawString("SCORE< 1 >  HI-SCORE   SCORE<2>", (int)(f.getWidth()*0.05) , (int)(f.getHeight()*0.1));
+	}
+	
 	//S'haura de canviar per quan implementi modificar el tamany de la finestra
 	public void KeyPressed(char key) {
 		int pos[] = p.getPosition();
-
 		switch(key) {
 			case 'a':
 				if(pos[0]>10) p.incPosition(-2,0);
 				else p.setPosition(8, pos[1]);
 				break;
 			case 'd':
-				if(pos[0]<690) p.incPosition(2,0);
-				else p.setPosition(692, pos[1]);
+				if(pos[0]<f.AMPLE-8-p_size[0]*f.scale) p.incPosition(2,0);
+				else p.setPosition(f.AMPLE-8-p_size[0]*f.scale, pos[1]);
 				break;
 			case ' ':
 				if(fire_time>fire_delay) {
@@ -248,6 +296,7 @@ public class joc {
 		f.g.setColor(Color.black);
 		f.g.fillRect(0,0, f.AMPLE,f.ALT);
 		p.mostraImatge(f.g,0);
+		showExplosions();
 		showBarriers();
 		showEnemies();
 		f.repaint();
@@ -265,6 +314,13 @@ public class joc {
 		for(Barrier b: bars) {
 			b.showBarrier(f.g);
 		}
+	}
+	
+	private void showExplosions() {
+		for(Explosion ex: explosions) {
+			ex.showExplosion(f.g);
+		}
+		explosions.removeIf(ex -> ex.dead == true);
 	}
 	
 	private void sleep() {

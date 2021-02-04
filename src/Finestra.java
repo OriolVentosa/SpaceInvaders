@@ -1,10 +1,17 @@
-import java.awt.Frame;
+import java.awt.Font;
+import java.awt.FontFormatException;
 import java.awt.Graphics;
+import java.awt.GraphicsEnvironment;
 import java.awt.Image;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.File;
+import java.io.IOException;
 
-public class Finestra extends Frame implements KeyListener {
+import javax.swing.JFrame;
+import javax.swing.JTextField;
+
+public class Finestra extends JFrame implements KeyListener {
 	/**
 	 * 
 	 */
@@ -13,13 +20,19 @@ public class Finestra extends Frame implements KeyListener {
 	joc j;
 	Graphics g;
 	Image im;
-	public int scale = 2;
+	String font_name = "space_invaders.ttf";
+	Font font;
+	
+	JTextField t1 = new JTextField("Hola");
+	
+	public int scale = 3;
 	int AMPLE = 262*scale, ALT = 315*scale;
 	public static void main(String[] args) {
 		new Finestra();
 	}
 	
 	Finestra(){
+		loadFont(font_name);
 		addKeyListener(this);
 		setSize(AMPLE,ALT);
 		setVisible(true);
@@ -29,6 +42,19 @@ public class Finestra extends Frame implements KeyListener {
 		j = new joc(this);
 		j.run();
 	}
+	
+	void loadFont(String font_name) {
+		try {
+			//create the font to use. Specify the size!
+		    font = Font.createFont(Font.TRUETYPE_FONT, new File("/SpaceInvaders/data/font/" + font_name)).deriveFont(scale*12f);
+		    GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+		    //register the font
+		    ge.registerFont(font);
+		} catch (IOException|FontFormatException e) {
+			System.out.println("No s'ha carregat la font");
+		}
+	}
+	
 	public void paint(Graphics g) {
 		g.drawImage(im, 0, 0, null);
 	}
