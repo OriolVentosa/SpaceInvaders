@@ -1,11 +1,9 @@
 import java.io.File; 
-import java.io.IOException; 
   
 import javax.sound.sampled.AudioInputStream; 
 import javax.sound.sampled.AudioSystem; 
 import javax.sound.sampled.Clip; 
-import javax.sound.sampled.LineUnavailableException; 
-import javax.sound.sampled.UnsupportedAudioFileException; 
+
 
 public class Sound {
 	
@@ -40,32 +38,9 @@ public class Sound {
 		clip.loop(nLoops);
 		status = "play";
 	}
-	
-	public void pause() {
-		if(status.equals("paused")) {
-			return;
-		}
-		
-		this.currentFrame = this.clip.getMicrosecondPosition();
-		clip.stop();
-		status = "paused";
-	}
-	
-	public void resume() {
-		if(status.equals("play")) {
-			return;
-		}
-		clip.close();
-		resetAudioStream();
-		clip.setMicrosecondPosition(currentFrame);
-		this.play();
-	}
-	
+
 	public void restart() {
 		clip.stop();
-		clip.close();
-		resetAudioStream();
-		currentFrame = 0L;
 		clip.setMicrosecondPosition(0);
 		this.play();
 	}
@@ -76,13 +51,4 @@ public class Sound {
 		clip.close();
 	}
 	
-	public void resetAudioStream() {
-		try {
-			audioInputStream = AudioSystem.getAudioInputStream(new File(filePath));
-			clip.open(audioInputStream);
-			clip.loop(nLoops);
-		} catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
-			e.printStackTrace();
-		}
-	}
 }

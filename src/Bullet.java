@@ -1,7 +1,6 @@
-import java.awt.Color;
 import java.awt.Graphics;
 
-public class Bullet {
+abstract class Bullet {
 	int x,y;
 	int width = 10;
 	int height = 30;
@@ -10,25 +9,20 @@ public class Bullet {
 	boolean alive = true;
 
 	//Si es del enemic
-	Boolean enemy;
 	
-	Bullet(int x, int y, int width, int height, Boolean enemy){
+	Bullet(int x, int y, int width, int height, int speed){
 		this.x = x;
 		this.y = y;
 		this.width = width;
 		this.height = height;
-		this.enemy = enemy;
+		this.speed = speed;
 	}
 	
 	void move(int dir) {
 		y-=speed*dir;
 	}
 	
-	void pintar(Graphics g){
-		if(!alive) return;
-		g.setColor(Color.white);
-		g.fillRect(x, y, width, height);
-	}
+	abstract void pintar(Graphics g);
 	
 	int[] getPos() {
 		int[] pos = {x,y};

@@ -25,4 +25,9 @@ public class Sprite{
         g2.setPaint(paint);
         g2.fillRect(x, y, width, height);
 	}
+	
+	public void setPos(int x, int y) {
+		this.x = x;
+		this.y = y;
+	}
 }

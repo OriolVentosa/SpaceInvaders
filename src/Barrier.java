@@ -7,7 +7,7 @@ public class Barrier {
 	int scale;
 	boolean not_broken[][];
 	int[] forma = {
-				0,0,0,0,0,1,1,1,1,0,0,0,0,0,
+				0,0,0,0,1,1,1,1,1,1,0,0,0,0,
 				0,0,0,1,1,1,1,1,1,1,1,0,0,0,
 				0,0,1,1,1,1,1,1,1,1,1,1,0,0,
 				0,1,1,1,1,1,1,1,1,1,1,1,1,0,
@@ -18,26 +18,29 @@ public class Barrier {
 				1,1,1,1,0,0,0,0,0,0,1,1,1,1,
 				1,1,1,0,0,0,0,0,0,0,0,1,1,1,
 				1,1,0,0,0,0,0,0,0,0,0,0,1,1,
-				1,1,0,0,0,0,0,0,0,0,0,0,1,1,
-				};
+				1,1,0,0,0,0,0,0,0,0,0,0,1,1};
 	
-	int explosion_radius = 7;
+	int explosion_radius = 8;
 	
-	int[] explosion = {
-				1,1,1,0,1,1,1,0,1,1,1,0,1,1,1,
-				1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,
-				1,1,0,1,1,1,1,0,1,1,0,1,1,1,1,
-				1,1,1,1,1,0,0,1,1,0,0,1,1,1,1,
-				1,1,1,1,1,0,1,0,1,0,0,1,1,1,1,
-				1,1,0,1,0,1,1,0,1,1,1,1,1,1,1,
-				1,1,0,0,1,1,0,1,0,1,0,1,1,1,1,
-				1,1,0,1,0,0,1,0,1,0,0,1,1,1,1,
-				1,0,1,0,1,0,1,0,1,1,1,0,1,1,1,
-				0,1,0,1,1,0,0,0,0,1,1,1,1,1,1,
-				1,0,1,1,1,0,0,0,0,1,0,1,0,1,1,
-				0,1,0,1,1,0,0,0,0,1,0,1,0,1,1,
-				1,0,1,0,1,0,0,0,0,1,1,0,1,1,1,
-				1,1,0,1,1,0,0,0,0,0,0,1,1,1,1,
+	//No arriba mai a les 4 ultimes files
+	int[][] explosion = {
+				{1,0,1,0,1,1,1,0,0,0,1,0,0,1,1,1,1},
+				{1,1,0,1,0,1,1,0,0,0,1,1,1,0,1,1,1},
+				{1,0,1,1,1,1,1,0,0,0,1,1,1,0,1,0,1},
+				{1,1,0,0,1,1,1,0,0,0,1,0,1,1,0,1,0},
+				{1,1,0,1,0,1,1,0,0,0,0,1,1,0,0,1,1},
+				{1,1,0,1,0,1,1,0,0,0,1,0,1,1,1,1,0},
+				{1,1,0,1,0,1,0,0,0,0,1,1,0,0,1,0,0},
+				{1,0,1,0,1,0,1,0,0,0,0,1,1,1,0,0,1},
+				{1,0,1,1,0,1,1,0,0,0,1,1,0,0,1,1,1},
+				{1,1,0,1,0,1,1,0,0,0,0,0,1,1,1,0,1},
+				{0,1,0,1,1,0,1,0,0,0,1,0,1,1,1,1,1},
+				{1,0,1,1,1,1,1,0,0,0,0,1,1,0,1,0,0},
+				{1,1,0,0,1,0,1,0,0,0,1,0,1,0,1,1,1},
+				{1,0,1,1,1,1,1,0,0,0,0,1,0,1,0,1,1},
+				{0,0,1,0,0,1,1,0,0,0,0,1,0,1,0,1,1},
+				{1,0,1,0,1,0,1,0,0,0,1,1,0,1,0,1,1},
+				{1,1,0,1,1,1,1,0,0,0,1,1,0,1,0,1,1}
 	};
 	
 	int x;
@@ -46,7 +49,7 @@ public class Barrier {
 		this.x = x;
 		this.y = y;
 		not_broken = new boolean[width * 2 * scale][height * 2 * scale];
-		for(int i = 0; i<width * 2 * scale; i++) {
+		for(int i = 0; i<width * 2 * scale; i++) { 
 			for(int j= 0; j<height * 2 * scale; j++) {
 				int index_i  = i/(scale*2);
 				int index_j = j/(scale*2);
@@ -99,31 +102,33 @@ public class Barrier {
 					if(not_broken[local_pos_x+i][local_pos_y+j]) {
 						not_broken[local_pos_x+i][local_pos_y+j] = false;
 						hit = true;
-
 					}
 				}
 			}
 		}
 		
 		if(hit) {
-			handleExplosionRadius(b_pos, local_pos_x+b_size[0]/2, local_pos_y+b_size[1]/2);
+			//Arreglo cutre perque les bales dels enemics no feien gaire mal a la barrera
+			//Nomes agafava la part de més baixa de l'explosio
+			if(enemy) {
+				local_pos_y += 3+b_size[1]/3;
+			}
+			handleExplosionRadius(local_pos_x+b_size[0]/2, local_pos_y+b_size[1]/2);
 		}
 		return hit;		
 	}
 	
-	// Intentar que sembli un cercle, fer destruccio mes aleatoria
-	private void handleExplosionRadius(int[] b_pos, int local_pos_x, int local_pos_y) {
+	private void handleExplosionRadius(int local_pos_x, int local_pos_y) {
 		int scaled_i;
 		int scaled_j;
-		int index;
+
 		for(int i = -explosion_radius*scale; i < explosion_radius*scale; i++) {
 			for(int j = -explosion_radius; j < explosion_radius; j++) {
 				scaled_i = i/scale;
 				scaled_j = j/scale;
 				scaled_i = scaled_i+explosion_radius;
 				scaled_j = scaled_j+explosion_radius;
-				index = scaled_j*(explosion_radius*2+1) + scaled_i;
-				if(explosion[index] == 0) {
+				if(explosion[scaled_j][scaled_i]== 0) {
 					if(local_pos_x+i>-1 && local_pos_y + j>-1 && 
 					local_pos_x+i<width && local_pos_y + j <height) {
 						not_broken[local_pos_x+i][local_pos_y+j] = false;
