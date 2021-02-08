@@ -13,7 +13,6 @@ public class Sound {
 	//qualsevol segment del audio
 	Clip clip;
 	
-	String status;
 	String filePath;
 	int nLoops;
 	
@@ -36,7 +35,6 @@ public class Sound {
 	
 	public void play() {
 		clip.loop(nLoops);
-		status = "play";
 	}
 
 	public void restart() {

@@ -8,8 +8,6 @@ abstract class Bullet {
 	
 	boolean alive = true;
 
-	//Si es del enemic
-	
 	Bullet(int x, int y, int width, int height, int speed){
 		this.x = x;
 		this.y = y;

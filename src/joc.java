@@ -1,9 +1,11 @@
 import java.awt.Color;
+import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.Random;
 
 public class joc {
 	Finestra f;
+	Graphics2D g2;
 	//Guarda totes les imatges del joc
 	TextureLoader tl;
 	//Jugador
@@ -31,11 +33,11 @@ public class joc {
 	Sound p_death;
 
 	//Timer moviment del enemic
-	long e_move_delay = 1000;
+	long e_move_delay = 900;
 	long move_time = 0;
 	
 	//Timer dispar del enemic
-	long e_fire_delay = 500;
+	long e_fire_delay = 1000;
 	long e_fire_time = 0;
 
 	//Timer dispar del jugador
@@ -49,7 +51,7 @@ public class joc {
 	int side_speed = 10;
 	int down_speed = 13;
 	int dir = -1;
-	boolean w_down = false;
+	boolean w_down = false; 
 	
 	//Distancia entre naus enemigues
 	int[] e_space = {6,6};
@@ -65,8 +67,10 @@ public class joc {
 	//Variables per controlar timers
 	long delta_time;
 	long last_time;
+	int r_index = 0;
+	int r_index_2 = 0;
 	
-	//Variables explosinons
+	//Variables explosions
 	long ex_time = 250;
 	int ex_size = 15;
 	
@@ -74,22 +78,53 @@ public class joc {
 	int score = 0;
 	int hiscore = 0;
 	
-	int e_count = 52;
+	int e_count = 0;
+		
+	//Variables per gestionar final de la partida
+	boolean ended = false;
+	boolean restart = false;
+	boolean won = false;
 	
-	joc(Finestra f){
+	String total = "GAME OVER";
+	String total2 = "R PER REINTENTAR";
+	String aux = "";
+	String aux2 = "";
+	
+	//Timer pantalla final
+	long restart_delay = 200;
+	long restart_time = 0;
+	
+	
+	joc(Finestra f, int score, int hiscore){
 		this.f = f;
+		this.score = score;
+		this.hiscore = hiscore;
 	}
 	
 	void run() {
 		loadTextures();
 		inicialitzacio();
-		while(true) {
+		while(!ended) {
 			updateTimers();
 			pintarPantalla();
 			handleBullets();
 			updateEnemies();
+			checkEnd();
 			sleep();
 		}
+		
+		fast_move.stop();
+		last_move.stop();
+		
+		if(won) return;
+		
+		if(hiscore<score) hiscore = score;
+		
+		while(!restart) {
+			gameOver();
+		}
+		
+		
 	}
 	
 	void loadTextures() {
@@ -103,6 +138,7 @@ public class joc {
 	}
 	
 	private void inicialitzacio() {
+		g2 = (Graphics2D)f.g;
 		last_time = System.currentTimeMillis();
 		p = new Player(f.getWidth()/2,(int)(f.getHeight()*0.8), p_size[0]*f.scale, p_size[1]*f.scale, 3, tl.getPlayerImage());
 		pSprite = new Sprite(tl.getPlayerImage(), 0, 0, p_size[0]*f.scale, p_size[1]*f.scale);
@@ -119,8 +155,19 @@ public class joc {
 		w_down = false;
 		for(int i =0 ; i<enemies.length; i++) {
 			for(int j = 0; j<enemies[0].length; j++ ) {
-				enemies[i][j] = new Enemy(8 + i*(e_size[0] + e_space[0])*f.scale, (int)(f.getHeight()*0.25)+ j*(e_size[1] + e_space[1])*f.scale, 
-											e_size[0]*f.scale,e_size[1]*f.scale, 1,1, tl.getEnemiesImages(1));
+				if(j<1) {
+					enemies[i][j] = new Enemy(8 + i*(e_size[0] + e_space[0])*f.scale, (int)(f.getHeight()*0.25)+ j*(e_size[1] + e_space[1])*f.scale, 
+							e_size[0]*f.scale,e_size[1]*f.scale, 1,1, tl.getEnemiesImages(1));
+				}
+				else if(j<3) {
+					enemies[i][j] = new Enemy(8 + i*(e_size[0] + e_space[0])*f.scale, (int)(f.getHeight()*0.25)+ j*(e_size[1] + e_space[1])*f.scale, 
+							e_size[0]*f.scale,e_size[1]*f.scale, 1,1, tl.getEnemiesImages(2));
+				}
+				else {
+					enemies[i][j] = new Enemy(8 + i*(e_size[0] + e_space[0])*f.scale, (int)(f.getHeight()*0.25)+ j*(e_size[1] + e_space[1])*f.scale, 
+							e_size[0]*f.scale,e_size[1]*f.scale, 1,1, tl.getEnemiesImages(3));
+				}
+				
 			}
 		}
 	}
@@ -193,6 +240,7 @@ public class joc {
 						e_death.restart();
 						score+=10;
 						e_count+=1;
+						e_move_delay-=17;
 					}
 				}
 			}
@@ -231,19 +279,18 @@ public class joc {
 		//Fer que es moguin cada vegada mes rapid		
 		if(e_move_delay<move_time) {
 			moveEnemies();
-			if(e_move_delay>400) {
+			if(e_move_delay>430) {
 				move.restart();
 			}
 			else {
 				if(e_count<54) {
-					move.stop();
+					//move.stop();
 					fast_move.play();
 				}
 				else {
 					fast_move.stop();
 					last_move.play();
 				}
-
 			}
 		}
 		
@@ -364,6 +411,8 @@ public class joc {
 					shoot.restart();
 				}
 				break;
+			case 'r':
+				if(ended) restart = true;
 		}
 	}
 	
@@ -404,12 +453,61 @@ public class joc {
 		g_ui.showVides(p.getHealth(), f.scale);
 	}
 	
+	private void checkEnd() {
+		int[] pos;
+		for(int i = 0; i<enemies.length; i++) {
+			for(int j=enemies[0].length-1; j>-1;j--) {
+				if(enemies[i][j].alive) {
+					pos = enemies[i][j].getPosition();
+					if(pos[1]+e_size[1]*f.scale>(int)(f.getHeight()*0.7)) ended = true;
+					won = false;
+					break;
+				}
+			}
+		}
+		
+		if(p.getHealth()<1) {
+			won = false;
+			ended = true;
+		}
+		
+		if(e_count == 55) {
+			ended = true;
+			won = true;
+		}
+	}
+	
 	private void sleep() {
 		try {
 			Thread.sleep(25);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace(); 
+		}
+	}
+		
+	private void gameOver(){
+		g2.setColor(Color.red);
+		
+		delta_time = System.currentTimeMillis()-last_time;
+		last_time = System.currentTimeMillis();
+		restart_time += delta_time;
+		
+		if(restart_time>restart_delay) {
+			if(r_index != total.length()) {
+				aux += total.charAt(r_index);
+				g2.drawString(aux, (int)(f.getWidth()*0.35) , (int)(f.getHeight()*0.50));
+				r_index+=1;
+				f.repaint();
+				restart_time = 0;
+			}
+			else if(r_index_2 != total2.length()) {
+				aux2 += total2.charAt(r_index_2);
+				g2.drawString(aux2, (int)(f.getWidth()*0.25) , (int)(f.getHeight()*0.55));
+				r_index_2+=1;
+				f.repaint();
+				restart_time = 0;
+			}
 		}
 	}
 }

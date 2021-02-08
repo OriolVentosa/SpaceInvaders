@@ -23,6 +23,7 @@ public class Finestra extends JFrame implements KeyListener, WindowListener  {
 	Image im;
 	String font_name = "space_invaders.ttf";
 	Font font;
+	int score = 0, hiscore = 0;
 
 	public int scale = 3;
 	int AMPLE = 262*scale, ALT = 315*scale;
@@ -33,13 +34,25 @@ public class Finestra extends JFrame implements KeyListener, WindowListener  {
 	Finestra(){
 		loadFont(font_name);
 		addKeyListener(this);
+		addWindowListener(this);
 		setSize(AMPLE,ALT);
 		setVisible(true);
 		
 		im = createImage(AMPLE, ALT);
 		g = im.getGraphics();
-		j = new joc(this);
-		j.run();
+		while(true) {
+			j = new joc(this, score, hiscore);
+			j.run();
+			
+			if(j.won) {
+				score = j.score;
+			}
+			else {
+				score = 0;
+				hiscore = j.hiscore;
+			}
+		}
+
 	}
 	
 	void loadFont(String font_name) {
@@ -79,7 +92,6 @@ public class Finestra extends JFrame implements KeyListener, WindowListener  {
 	@Override
 	public void windowOpened(WindowEvent e) {
 		// TODO Auto-generated method stub
-		System.out.println("afhosdfas");
 	}
 
 	@Override
@@ -88,8 +100,7 @@ public class Finestra extends JFrame implements KeyListener, WindowListener  {
 	}
 
 	@Override
-	public void windowClosed(WindowEvent e) {
-		System.exit(0);		
+	public void windowClosed(WindowEvent e) {		
 		
 	}
 
